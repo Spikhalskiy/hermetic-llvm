@@ -19,6 +19,7 @@ load(
     "asan_cc_binary",
     "asan_cc_test",
     "asan_fission_cc_binary",
+    "assert_msvc_tuple_features",
     "cfi_cc_binary",
     "cs_fdo_instrument_cc_binary",
     "dfsan_cc_binary",
@@ -1038,6 +1039,19 @@ exec_test(
     }),
 )
 
+# Valid standard-library operations must not produce MSan false positives.
+exec_test(
+    msan_cc_binary,
+    name = "msan_libcxx_test",
+    srcs = ["msan_libcxx_test.cc"],
+    copts = ["-O1"],
+    linkstatic = True,
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
 msan_cc_binary(
     name = "msan_fail",
     srcs = ["msan_fail.cc"],
@@ -1775,6 +1789,8 @@ cc_test(
     }),
     deps = [":coverage_lib"],
 )
+
+assert_msvc_tuple_features()
 
 _WINDOWS_MSVC_ARTIFACT_PLATFORMS = [
     ("x86_64", "@llvm//platforms:windows_x86_64_msvc", "AMD64"),
