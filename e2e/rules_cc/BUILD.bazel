@@ -1018,6 +1018,19 @@ exec_test(
     }),
 )
 
+# Valid standard-library operations must not produce MSan false positives.
+exec_test(
+    msan_cc_binary,
+    name = "msan_libcxx_test",
+    srcs = ["msan_libcxx_test.cc"],
+    copts = ["-O1"],
+    linkstatic = True,
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+)
+
 msan_cc_binary(
     name = "msan_fail",
     srcs = ["msan_fail.cc"],
