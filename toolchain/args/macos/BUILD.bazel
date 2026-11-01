@@ -94,6 +94,18 @@ cc_args(
     ],
 )
 
+# Nodeps dylibs contain only the target's own objects, so symbols from its
+# dependencies stay undefined, as in ELF shared libraries. Executables and
+# cc_shared_library links still resolve every symbol.
+cc_args(
+    name = "nodeps_dynamic_library_link_flags",
+    actions = [
+        "@rules_cc//cc/toolchains/actions:cpp_link_nodeps_dynamic_library",
+        "@rules_cc//cc/toolchains/actions:lto_index_for_nodeps_dynamic_library",
+    ],
+    args = ["-Wl,-undefined,dynamic_lookup"],
+)
+
 cc_args(
     name = "deterministic_link_flags",
     actions = [

@@ -1691,12 +1691,25 @@ filegroup(
     output_group = "dynamic_library",
 )
 
+# Its nodeps shared library leaves shared_answer undefined. Windows links
+# dependencies into nodeps DLLs, so the case only exists on ELF and Mach-O.
+cc_library(
+    name = "shared_library_dependent",
+    srcs = ["shared_library_dependent.c"],
+    hdrs = ["shared_library_dependent.h"],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+    deps = ["shared_library_probe"],
+)
+
 filegroup(
     name = "shared_library_outputs",
     # Windows cc_library default outputs omit DLLs; use the native output group.
     srcs = ["shared_library_probe"] + select({
         "@platforms//os:windows": ["shared_library_dynamic_outputs"],
-        "//conditions:default": [],
+        "//conditions:default": ["shared_library_dependent"],
     }),
 )
 
@@ -1756,6 +1769,21 @@ cc_test(
         "//conditions:default": [],
     }),
     deps = ["shared_library_probe"],
+)
+
+cc_test(
+    name = "shared_library_dependent_consumer_test",
+    srcs = ["shared_library_dependent_consumer.c"],
+    linkstatic = False,
+    target_compatible_with = select({
+        "@llvm//platforms/config:musl": ["@platforms//:incompatible"],
+        "@platforms//os:macos": [] if bazel_features.cc.supports_starlarkified_toolchains else ["@platforms//:incompatible"],
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "@platforms//os:uefi": ["@platforms//:incompatible"],
+        "@platforms//os:none": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+    deps = ["shared_library_dependent"],
 )
 
 cc_library(

@@ -139,6 +139,7 @@ cc_args_list(
     args = select({
         "@platforms//os:macos": [
             "//toolchain/args/macos:default_link_flags",
+            "//toolchain/args/macos:nodeps_dynamic_library_link_flags",
         ],
         "@platforms//os:linux": [
             "//toolchain/args/linux:default_link_flags",
